@@ -15,9 +15,579 @@ import {
 } from 'lucide-react';
 import React, { useState } from 'react';
 
+function CreateRoomModal({ isOpen, onClose, onCreateRoom }) {
+  const [chatType, setChatType] = useState('private'); // 'private' or 'group'
+  const [username, setUsername] = useState('');
+  const [userDomain, setUserDomain] = useState('');
+  const [roomName, setRoomName] = useState('');
+  const [roomTopic, setRoomTopic] = useState('');
+  const [roomPrivacy, setRoomPrivacy] = useState('private'); // 'public' or 'private'
+  const [userSearch, setUserSearch] = useState('');
+  const [selectedUsers, setSelectedUsers] = useState([]);
+
+  // TODO: Replace with actual API call
+  const mockUsers = [
+    {
+      id: 1,
+      username: 'john.doe',
+      domain: 'matrix.org',
+      displayName: 'John Doe',
+    },
+    {
+      id: 2,
+      username: 'jane.smith',
+      domain: 'matrix.org',
+      displayName: 'Jane Smith',
+    },
+    {
+      id: 3,
+      username: 'bob.wilson',
+      domain: 'matrix.org',
+      displayName: 'Bob Wilson',
+    },
+    {
+      id: 4,
+      username: 'alice.brown',
+      domain: 'matrix.org',
+      displayName: 'Alice Brown',
+    },
+    {
+      id: 5,
+      username: 'charlie.davis',
+      domain: 'matrix.org',
+      displayName: 'Charlie Davis',
+    },
+  ];
+
+  const filteredUsers = mockUsers.filter(
+    (user) =>
+      !selectedUsers.find((u) => u.id === user.id) &&
+      (user.displayName.toLowerCase().includes(userSearch.toLowerCase()) ||
+        user.username.toLowerCase().includes(userSearch.toLowerCase())),
+  );
+
+  const handleAddUser = (user) => {
+    setSelectedUsers([...selectedUsers, user]);
+    setUserSearch('');
+  };
+
+  const handleRemoveUser = (userId) => {
+    setSelectedUsers(selectedUsers.filter((u) => u.id !== userId));
+  };
+
+  const handleCreate = () => {
+    if (chatType === 'private') {
+      // TODO: Create private chat with username@userDomain
+      console.log('Creating private chat with:', `${username}@${userDomain}`);
+      onCreateRoom({ type: 'private', username, userDomain });
+    } else {
+      // TODO: Create group chat
+      console.log('Creating group chat:', {
+        roomName,
+        roomTopic,
+        roomPrivacy,
+        users: selectedUsers,
+      });
+      onCreateRoom({
+        type: 'group',
+        roomName,
+        roomTopic,
+        roomPrivacy,
+        users: selectedUsers,
+      });
+    }
+    handleClose();
+  };
+
+  const handleClose = () => {
+    setChatType('private');
+    setUsername('');
+    setUserDomain('');
+    setRoomName('');
+    setRoomTopic('');
+    setRoomPrivacy('private');
+    setUserSearch('');
+    setSelectedUsers([]);
+    onClose();
+  };
+
+  if (!isOpen) return null;
+
+  return (
+    <div
+      style={{
+        position: 'fixed',
+        top: 0,
+        left: 0,
+        right: 0,
+        bottom: 0,
+        backgroundColor: 'rgba(0, 0, 0, 0.7)',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        zIndex: 2000,
+      }}
+    >
+      <div
+        style={{
+          backgroundColor: '#2a2a2a',
+          borderRadius: '8px',
+          width: '90%',
+          maxWidth: '500px',
+          maxHeight: '90vh',
+          overflow: 'auto',
+          border: '1px solid #444',
+        }}
+      >
+        <div
+          style={{
+            padding: '20px',
+            borderBottom: '1px solid #444',
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+          }}
+        >
+          <h2 style={{ margin: 0, color: '#fff', fontSize: '18px' }}>
+            Create New Room
+          </h2>
+          <button
+            onClick={handleClose}
+            style={{
+              background: 'none',
+              border: 'none',
+              color: '#888',
+              cursor: 'pointer',
+              fontSize: '24px',
+              padding: '0',
+              width: '30px',
+              height: '30px',
+            }}
+          >
+            ×
+          </button>
+        </div>
+
+        <div style={{ padding: '20px' }}>
+          {/* Chat Type Selection */}
+          <div style={{ marginBottom: '24px' }}>
+            <label
+              style={{
+                display: 'block',
+                color: '#aaa',
+                fontSize: '13px',
+                marginBottom: '8px',
+              }}
+            >
+              Chat Type
+            </label>
+            <div style={{ display: 'flex', gap: '12px' }}>
+              <button
+                onClick={() => setChatType('private')}
+                style={{
+                  flex: 1,
+                  padding: '10px',
+                  backgroundColor:
+                    chatType === 'private' ? '#4a90e2' : 'transparent',
+                  border: `1px solid ${chatType === 'private' ? '#4a90e2' : '#444'}`,
+                  borderRadius: '4px',
+                  color: '#fff',
+                  cursor: 'pointer',
+                  fontSize: '13px',
+                }}
+              >
+                Private Chat
+              </button>
+              <button
+                onClick={() => setChatType('group')}
+                style={{
+                  flex: 1,
+                  padding: '10px',
+                  backgroundColor:
+                    chatType === 'group' ? '#4a90e2' : 'transparent',
+                  border: `1px solid ${chatType === 'group' ? '#4a90e2' : '#444'}`,
+                  borderRadius: '4px',
+                  color: '#fff',
+                  cursor: 'pointer',
+                  fontSize: '13px',
+                }}
+              >
+                Group Chat
+              </button>
+            </div>
+          </div>
+
+          {/* Private Chat Form */}
+          {chatType === 'private' && (
+            <>
+              <div style={{ marginBottom: '16px' }}>
+                <label
+                  style={{
+                    display: 'block',
+                    color: '#aaa',
+                    fontSize: '13px',
+                    marginBottom: '8px',
+                  }}
+                >
+                  Username
+                </label>
+                <input
+                  type="text"
+                  value={username}
+                  onChange={(e) => setUsername(e.target.value)}
+                  placeholder="Enter username"
+                  style={{
+                    width: '100%',
+                    padding: '10px',
+                    backgroundColor: '#1e1e1e',
+                    border: '1px solid #444',
+                    borderRadius: '4px',
+                    color: '#fff',
+                    fontSize: '13px',
+                  }}
+                />
+              </div>
+              <div style={{ marginBottom: '16px' }}>
+                <label
+                  style={{
+                    display: 'block',
+                    color: '#aaa',
+                    fontSize: '13px',
+                    marginBottom: '8px',
+                  }}
+                >
+                  User Domain
+                </label>
+                <input
+                  type="text"
+                  value={userDomain}
+                  onChange={(e) => setUserDomain(e.target.value)}
+                  placeholder="e.g., matrix.org"
+                  style={{
+                    width: '100%',
+                    padding: '10px',
+                    backgroundColor: '#1e1e1e',
+                    border: '1px solid #444',
+                    borderRadius: '4px',
+                    color: '#fff',
+                    fontSize: '13px',
+                  }}
+                />
+              </div>
+            </>
+          )}
+
+          {/* Group Chat Form */}
+          {chatType === 'group' && (
+            <>
+              <div style={{ marginBottom: '16px' }}>
+                <label
+                  style={{
+                    display: 'block',
+                    color: '#aaa',
+                    fontSize: '13px',
+                    marginBottom: '8px',
+                  }}
+                >
+                  Room Privacy
+                </label>
+                <div style={{ display: 'flex', gap: '12px' }}>
+                  <button
+                    onClick={() => setRoomPrivacy('public')}
+                    style={{
+                      flex: 1,
+                      padding: '8px',
+                      backgroundColor:
+                        roomPrivacy === 'public' ? '#4a90e2' : 'transparent',
+                      border: `1px solid ${roomPrivacy === 'public' ? '#4a90e2' : '#444'}`,
+                      borderRadius: '4px',
+                      color: '#fff',
+                      cursor: 'pointer',
+                      fontSize: '12px',
+                    }}
+                  >
+                    Public
+                  </button>
+                  <button
+                    onClick={() => setRoomPrivacy('private')}
+                    style={{
+                      flex: 1,
+                      padding: '8px',
+                      backgroundColor:
+                        roomPrivacy === 'private' ? '#4a90e2' : 'transparent',
+                      border: `1px solid ${roomPrivacy === 'private' ? '#4a90e2' : '#444'}`,
+                      borderRadius: '4px',
+                      color: '#fff',
+                      cursor: 'pointer',
+                      fontSize: '12px',
+                    }}
+                  >
+                    Private
+                  </button>
+                </div>
+              </div>
+              <div style={{ marginBottom: '16px' }}>
+                <label
+                  style={{
+                    display: 'block',
+                    color: '#aaa',
+                    fontSize: '13px',
+                    marginBottom: '8px',
+                  }}
+                >
+                  Room Name
+                </label>
+                <input
+                  type="text"
+                  value={roomName}
+                  onChange={(e) => setRoomName(e.target.value)}
+                  placeholder="Enter room name"
+                  style={{
+                    width: '100%',
+                    padding: '10px',
+                    backgroundColor: '#1e1e1e',
+                    border: '1px solid #444',
+                    borderRadius: '4px',
+                    color: '#fff',
+                    fontSize: '13px',
+                  }}
+                />
+              </div>
+              <div style={{ marginBottom: '16px' }}>
+                <label
+                  style={{
+                    display: 'block',
+                    color: '#aaa',
+                    fontSize: '13px',
+                    marginBottom: '8px',
+                  }}
+                >
+                  Topic (Optional)
+                </label>
+                <input
+                  type="text"
+                  value={roomTopic}
+                  onChange={(e) => setRoomTopic(e.target.value)}
+                  placeholder="Enter room topic"
+                  style={{
+                    width: '100%',
+                    padding: '10px',
+                    backgroundColor: '#1e1e1e',
+                    border: '1px solid #444',
+                    borderRadius: '4px',
+                    color: '#fff',
+                    fontSize: '13px',
+                  }}
+                />
+              </div>
+              <div style={{ marginBottom: '16px' }}>
+                <label
+                  style={{
+                    display: 'block',
+                    color: '#aaa',
+                    fontSize: '13px',
+                    marginBottom: '8px',
+                  }}
+                >
+                  Add Users
+                </label>
+                {/* Selected Users (Chips) */}
+                {selectedUsers.length > 0 && (
+                  <div
+                    style={{
+                      display: 'flex',
+                      flexWrap: 'wrap',
+                      gap: '8px',
+                      marginBottom: '8px',
+                      padding: '8px',
+                      backgroundColor: '#1e1e1e',
+                      borderRadius: '4px',
+                      border: '1px solid #444',
+                    }}
+                  >
+                    {selectedUsers.map((user) => (
+                      <div
+                        key={user.id}
+                        style={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '6px',
+                          padding: '4px 10px',
+                          backgroundColor: '#4a90e2',
+                          borderRadius: '16px',
+                          fontSize: '12px',
+                          color: '#fff',
+                        }}
+                      >
+                        <span>{user.displayName}</span>
+                        <button
+                          onClick={() => handleRemoveUser(user.id)}
+                          style={{
+                            background: 'none',
+                            border: 'none',
+                            color: '#fff',
+                            cursor: 'pointer',
+                            padding: '0',
+                            fontSize: '16px',
+                            lineHeight: '1',
+                          }}
+                        >
+                          ×
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                )}
+                {/* User Search */}
+                <input
+                  type="text"
+                  value={userSearch}
+                  onChange={(e) => setUserSearch(e.target.value)}
+                  placeholder="Search users..."
+                  style={{
+                    width: '100%',
+                    padding: '10px',
+                    backgroundColor: '#1e1e1e',
+                    border: '1px solid #444',
+                    borderRadius: '4px',
+                    color: '#fff',
+                    fontSize: '13px',
+                  }}
+                />
+                {/* User List */}
+                {userSearch && filteredUsers.length > 0 && (
+                  <div
+                    style={{
+                      marginTop: '8px',
+                      backgroundColor: '#1e1e1e',
+                      border: '1px solid #444',
+                      borderRadius: '4px',
+                      maxHeight: '150px',
+                      overflow: 'auto',
+                    }}
+                  >
+                    {filteredUsers.map((user) => (
+                      <div
+                        key={user.id}
+                        onClick={() => handleAddUser(user)}
+                        style={{
+                          padding: '10px',
+                          cursor: 'pointer',
+                          borderBottom: '1px solid #333',
+                          transition: 'background-color 0.2s',
+                        }}
+                        onMouseOver={(e) =>
+                          (e.currentTarget.style.backgroundColor = '#2a2a2a')
+                        }
+                        onMouseOut={(e) =>
+                          (e.currentTarget.style.backgroundColor =
+                            'transparent')
+                        }
+                      >
+                        <div style={{ color: '#fff', fontSize: '13px' }}>
+                          {user.displayName}
+                        </div>
+                        <div style={{ color: '#888', fontSize: '11px' }}>
+                          @{user.username}:{user.domain}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+                {userSearch && filteredUsers.length === 0 && (
+                  <div
+                    style={{
+                      marginTop: '8px',
+                      padding: '10px',
+                      backgroundColor: '#1e1e1e',
+                      border: '1px solid #444',
+                      borderRadius: '4px',
+                      color: '#888',
+                      fontSize: '13px',
+                      textAlign: 'center',
+                    }}
+                  >
+                    No users found
+                  </div>
+                )}
+              </div>
+            </>
+          )}
+
+          {/* Action Buttons */}
+          <div style={{ display: 'flex', gap: '12px', marginTop: '24px' }}>
+            <button
+              onClick={handleClose}
+              style={{
+                flex: 1,
+                padding: '12px',
+                backgroundColor: 'transparent',
+                border: '1px solid #444',
+                borderRadius: '4px',
+                color: '#fff',
+                cursor: 'pointer',
+                fontSize: '13px',
+              }}
+            >
+              Cancel
+            </button>
+            <button
+              onClick={handleCreate}
+              disabled={
+                (chatType === 'private' && (!username || !userDomain)) ||
+                (chatType === 'group' && !roomName)
+              }
+              style={{
+                flex: 1,
+                padding: '12px',
+                backgroundColor: '#4a90e2',
+                border: 'none',
+                borderRadius: '4px',
+                color: '#fff',
+                cursor: 'pointer',
+                fontSize: '13px',
+                opacity:
+                  (chatType === 'private' && (!username || !userDomain)) ||
+                  (chatType === 'group' && !roomName)
+                    ? 0.5
+                    : 1,
+              }}
+            >
+              Create Room
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 // Navbar Component
 function Navbar({ onMenuClick }) {
   const [showUserMenu, setShowUserMenu] = useState(false);
+  const [showNotifications, setShowNotifications] = useState(false);
+  const [notificationCount, setNotificationCount] = useState(3);
+
+  const notifications = [
+    {
+      id: 1,
+      title: 'New message',
+      text: 'You have a new message from AX Status Management',
+      time: '2 min ago',
+    },
+    {
+      id: 2,
+      title: 'System Update',
+      text: 'System maintenance scheduled for tonight',
+      time: '1 hour ago',
+    },
+    {
+      id: 3,
+      title: 'Room Invite',
+      text: 'You were invited to Performance Status Operator',
+      time: '3 hours ago',
+    },
+  ];
 
   return (
     <div
@@ -62,22 +632,100 @@ function Navbar({ onMenuClick }) {
           gap: '32px',
           fontSize: '14px',
           color: '#aaa',
+          alignItems: 'center',
+          height: '64px',
         }}
       >
-        <span style={{ cursor: 'pointer' }}>Service</span>
-        <span style={{ cursor: 'pointer' }}>Plan</span>
-        <span
+        <button
+          onClick={() => console.log('Service clicked')}
           style={{
+            background: 'none',
+            border: 'none',
+            color: '#aaa',
+            cursor: 'pointer',
+            padding: '0',
+            height: '64px',
+            borderBottom: '2px solid transparent',
+            fontSize: '14px',
+          }}
+        >
+          Service
+        </button>
+        <button
+          onClick={() => console.log('Plan clicked')}
+          style={{
+            background: 'none',
+            border: 'none',
+            color: '#aaa',
+            cursor: 'pointer',
+            padding: '0',
+            height: '64px',
+            borderBottom: '2px solid transparent',
+            fontSize: '14px',
+          }}
+        >
+          Plan
+        </button>
+        <button
+          onClick={() => console.log('System clicked')}
+          style={{
+            background: 'none',
+            border: 'none',
             color: '#fff',
+            cursor: 'pointer',
+            padding: '0',
+            height: '64px',
             borderBottom: '2px solid #4a90e2',
-            paddingBottom: '20px',
+            fontSize: '14px',
           }}
         >
           System
-        </span>
-        <span style={{ cursor: 'pointer' }}>Records</span>
-        <span style={{ cursor: 'pointer' }}>Management</span>
-        <span style={{ cursor: 'pointer' }}>Status Report</span>
+        </button>
+        <button
+          onClick={() => console.log('Records clicked')}
+          style={{
+            background: 'none',
+            border: 'none',
+            color: '#aaa',
+            cursor: 'pointer',
+            padding: '0',
+            height: '64px',
+            borderBottom: '2px solid transparent',
+            fontSize: '14px',
+          }}
+        >
+          Records
+        </button>
+        <button
+          onClick={() => console.log('Management clicked')}
+          style={{
+            background: 'none',
+            border: 'none',
+            color: '#aaa',
+            cursor: 'pointer',
+            padding: '0',
+            height: '64px',
+            borderBottom: '2px solid transparent',
+            fontSize: '14px',
+          }}
+        >
+          Management
+        </button>
+        <button
+          onClick={() => console.log('Status Report clicked')}
+          style={{
+            background: 'none',
+            border: 'none',
+            color: '#aaa',
+            cursor: 'pointer',
+            padding: '0',
+            height: '64px',
+            borderBottom: '2px solid transparent',
+            fontSize: '14px',
+          }}
+        >
+          Status Report
+        </button>
       </div>
       <div
         style={{
@@ -87,6 +735,112 @@ function Navbar({ onMenuClick }) {
           alignItems: 'center',
         }}
       >
+        <div style={{ position: 'relative' }}>
+          <button
+            onClick={() => setShowNotifications(!showNotifications)}
+            style={{
+              background: 'none',
+              border: 'none',
+              color: '#aaa',
+              cursor: 'pointer',
+              padding: '8px',
+              position: 'relative',
+              display: 'flex',
+              alignItems: 'center',
+            }}
+          >
+            <Bell size={20} />
+            {notificationCount > 0 && (
+              <span
+                style={{
+                  position: 'absolute',
+                  top: '4px',
+                  right: '4px',
+                  backgroundColor: '#e74c3c',
+                  color: '#fff',
+                  borderRadius: '50%',
+                  width: '16px',
+                  height: '16px',
+                  fontSize: '10px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  fontWeight: 'bold',
+                }}
+              >
+                {notificationCount}
+              </span>
+            )}
+          </button>
+          {showNotifications && (
+            <div
+              style={{
+                position: 'absolute',
+                top: '45px',
+                right: 0,
+                backgroundColor: '#2a2a2a',
+                border: '1px solid #444',
+                borderRadius: '8px',
+                minWidth: '320px',
+                maxHeight: '400px',
+                overflow: 'auto',
+                zIndex: 1000,
+              }}
+            >
+              <div
+                style={{
+                  padding: '12px 16px',
+                  borderBottom: '1px solid #444',
+                  fontWeight: 'bold',
+                  color: '#fff',
+                  fontSize: '14px',
+                }}
+              >
+                Notifications
+              </div>
+              {notifications.map((notif) => (
+                <div
+                  key={notif.id}
+                  style={{
+                    padding: '12px 16px',
+                    borderBottom: '1px solid #444',
+                    cursor: 'pointer',
+                    transition: 'background-color 0.2s',
+                  }}
+                  onMouseOver={(e) =>
+                    (e.currentTarget.style.backgroundColor = '#333')
+                  }
+                  onMouseOut={(e) =>
+                    (e.currentTarget.style.backgroundColor = 'transparent')
+                  }
+                >
+                  <div
+                    style={{
+                      color: '#fff',
+                      fontSize: '13px',
+                      fontWeight: '500',
+                      marginBottom: '4px',
+                    }}
+                  >
+                    {notif.title}
+                  </div>
+                  <div
+                    style={{
+                      color: '#aaa',
+                      fontSize: '12px',
+                      marginBottom: '4px',
+                    }}
+                  >
+                    {notif.text}
+                  </div>
+                  <div style={{ color: '#888', fontSize: '11px' }}>
+                    {notif.time}
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
         <button
           style={{
             background: 'none',
@@ -94,17 +848,8 @@ function Navbar({ onMenuClick }) {
             color: '#aaa',
             cursor: 'pointer',
             padding: '8px',
-          }}
-        >
-          <Bell size={20} />
-        </button>
-        <button
-          style={{
-            background: 'none',
-            border: 'none',
-            color: '#aaa',
-            cursor: 'pointer',
-            padding: '8px',
+            display: 'flex',
+            alignItems: 'center',
           }}
         >
           <Home size={20} />
@@ -180,6 +925,7 @@ function Navbar({ onMenuClick }) {
 // Sidebar Component
 function Sidebar({ open, rooms, selectedRoom, onSelectRoom, onCreateRoom }) {
   const [searchQuery, setSearchQuery] = useState('');
+  const [isCreatingRoom, setCreatingRoom] = useState(false);
 
   if (!open) return null;
 
@@ -189,6 +935,11 @@ function Sidebar({ open, rooms, selectedRoom, onSelectRoom, onCreateRoom }) {
   //   const rooms = client.getRooms();
   //   return rooms;
   // };
+
+  // Filter rooms based on search query
+  const filteredRooms = rooms.filter((room) =>
+    room.name.toLowerCase().includes(searchQuery.toLowerCase()),
+  );
 
   return (
     <div
@@ -240,7 +991,9 @@ function Sidebar({ open, rooms, selectedRoom, onSelectRoom, onCreateRoom }) {
           />
         </div>
         <button
-          onClick={onCreateRoom}
+          onClick={() => {
+            setCreatingRoom(true);
+          }}
           style={{
             width: '100%',
             padding: '10px',
@@ -260,48 +1013,84 @@ function Sidebar({ open, rooms, selectedRoom, onSelectRoom, onCreateRoom }) {
         </button>
       </div>
       <div style={{ flexGrow: 1, overflow: 'auto', padding: '0 8px' }}>
-        {rooms.map((room, index) => (
+        {filteredRooms.length === 0 ? (
           <div
-            key={room.id}
-            onClick={() => onSelectRoom(index)}
             style={{
-              padding: '12px',
-              backgroundColor:
-                selectedRoom === index ? '#4a90e2' : 'transparent',
-              borderRadius: '4px',
-              cursor: 'pointer',
-              marginBottom: '4px',
-              display: 'flex',
-              justifyContent: 'space-between',
-              alignItems: 'center',
-              color: '#fff',
+              padding: '16px',
+              textAlign: 'center',
+              color: '#888',
               fontSize: '13px',
             }}
           >
-            <span>{room.name}</span>
-            {room.unread > 0 && (
-              <span
+            No rooms found
+          </div>
+        ) : (
+          filteredRooms.map((room, index) => {
+            // Find the original index for selection
+            const originalIndex = rooms.findIndex((r) => r.id === room.id);
+            return (
+              <div
+                key={room.id}
+                onClick={() => onSelectRoom(originalIndex)}
                 style={{
-                  backgroundColor: selectedRoom === index ? '#fff' : '#4a90e2',
-                  color: selectedRoom === index ? '#4a90e2' : '#fff',
-                  borderRadius: '10px',
-                  padding: '2px 8px',
-                  fontSize: '11px',
-                  fontWeight: 'bold',
+                  padding: '12px',
+                  backgroundColor:
+                    selectedRoom === originalIndex ? '#4a90e2' : 'transparent',
+                  borderRadius: '4px',
+                  cursor: 'pointer',
+                  marginBottom: '4px',
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  alignItems: 'center',
+                  color: '#fff',
+                  fontSize: '13px',
                 }}
               >
-                {room.unread}
-              </span>
-            )}
-          </div>
-        ))}
+                <span>{room.name}</span>
+                {room.unread > 0 && (
+                  <span
+                    style={{
+                      backgroundColor:
+                        selectedRoom === originalIndex ? '#fff' : '#4a90e2',
+                      color:
+                        selectedRoom === originalIndex ? '#4a90e2' : '#fff',
+                      borderRadius: '10px',
+                      padding: '2px 8px',
+                      fontSize: '11px',
+                      fontWeight: 'bold',
+                    }}
+                  >
+                    {room.unread}
+                  </span>
+                )}
+              </div>
+            );
+          })
+        )}
       </div>
+      {isCreatingRoom && (
+        <CreateRoomModal
+          isOpen={isCreatingRoom}
+          onClose={() => setCreatingRoom(false)}
+          onCreateRoom={() => {}}
+        />
+      )}
     </div>
   );
 }
 
 // Chat Messages Component
 function ChatMessages({ messages, roomName }) {
+  const messagesEndRef = React.useRef(null);
+
+  const scrollToBottom = () => {
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  };
+
+  React.useEffect(() => {
+    scrollToBottom();
+  }, [messages]);
+
   // TODO: Integrate Matrix SDK - fetch messages from room
   // const fetchMessages = async (roomId) => {
   //   const client = matrixClient;
@@ -411,6 +1200,7 @@ function ChatMessages({ messages, roomName }) {
           ⏱ Time left for operator acknowledge 03:12
         </div>
       </div>
+      <div ref={messagesEndRef} />
     </div>
   );
 }
@@ -419,6 +1209,35 @@ function ChatMessages({ messages, roomName }) {
 function InputBar({ onSendMessage }) {
   const [message, setMessage] = useState('');
   const [showPlugins, setShowPlugins] = useState(false);
+  const [showEmojis, setShowEmojis] = useState(false);
+
+  const emojis = [
+    '😀',
+    '😂',
+    '😍',
+    '🥰',
+    '😎',
+    '🤔',
+    '😊',
+    '😢',
+    '😭',
+    '😡',
+    '👍',
+    '👎',
+    '👏',
+    '🙌',
+    '💪',
+    '🔥',
+    '✨',
+    '❤️',
+    '💯',
+    '🎉',
+    '🚀',
+    '⭐',
+    '💡',
+    '✅',
+    '❌',
+  ];
 
   const handleSend = () => {
     if (message.trim()) {
@@ -435,6 +1254,11 @@ function InputBar({ onSendMessage }) {
       e.preventDefault();
       handleSend();
     }
+  };
+
+  const handleEmojiClick = (emoji) => {
+    setMessage(message + emoji);
+    setShowEmojis(false);
   };
 
   return (
@@ -505,19 +1329,62 @@ function InputBar({ onSendMessage }) {
           </div>
         )}
       </div>
-      <button
-        style={{
-          background: 'none',
-          border: 'none',
-          color: '#888',
-          cursor: 'pointer',
-          padding: '8px',
-          display: 'flex',
-          alignItems: 'center',
-        }}
-      >
-        <Smile size={20} />
-      </button>
+      <div style={{ position: 'relative' }}>
+        <button
+          onClick={() => setShowEmojis(!showEmojis)}
+          style={{
+            background: 'none',
+            border: 'none',
+            color: '#888',
+            cursor: 'pointer',
+            padding: '8px',
+            display: 'flex',
+            alignItems: 'center',
+          }}
+        >
+          <Smile size={20} />
+        </button>
+        {showEmojis && (
+          <div
+            style={{
+              position: 'absolute',
+              bottom: '40px',
+              left: 0,
+              backgroundColor: '#2a2a2a',
+              border: '1px solid #444',
+              borderRadius: '8px',
+              padding: '12px',
+              width: '280px',
+              display: 'grid',
+              gridTemplateColumns: 'repeat(5, 1fr)',
+              gap: '8px',
+              zIndex: 1000,
+            }}
+          >
+            {emojis.map((emoji, index) => (
+              <button
+                key={index}
+                onClick={() => handleEmojiClick(emoji)}
+                style={{
+                  background: 'none',
+                  border: 'none',
+                  fontSize: '24px',
+                  cursor: 'pointer',
+                  padding: '8px',
+                  borderRadius: '4px',
+                  transition: 'background-color 0.2s',
+                }}
+                onMouseOver={(e) => (e.target.style.backgroundColor = '#444')}
+                onMouseOut={(e) =>
+                  (e.target.style.backgroundColor = 'transparent')
+                }
+              >
+                {emoji}
+              </button>
+            ))}
+          </div>
+        )}
+      </div>
       <textarea
         placeholder="Type a message..."
         value={message}
@@ -628,6 +1495,7 @@ export default function MatrixChatApp() {
     // TODO: Integrate Matrix SDK - create new room
     // const client = matrixClient;
     // client.createRoom({ name: 'New Room', visibility: 'private' });
+
     console.log('Create new room');
   };
 
